@@ -1,0 +1,37 @@
+# Cut a release whenever a new tag is pushed to the repo.
+# This workflow is copied from rules_oci
+name: Release
+permissions:
+  contents: write
+on:
+  push:
+    tags:
+      - "v*.*.*"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Mount bazel caches
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/bazel
+          key: bazel-cache-${{ hashFiles('**/BUILD.bazel', '**/*.bzl', 'WORKSPACE') }}
+          restore-keys: bazel-cache-
+      - name: bazel test //...
+        env:
+          # Bazelisk will download bazel to here.
+          XDG_CACHE_HOME: ~/.cache/bazel-repo
+        run: bazel --bazelrc=.github/workflows/ci.bazelrc test //...
+      - name: Prepare release notes and artifacts
+        run: .github/workflows/release_prep.sh ${{ env.GITHUB_REF_NAME }} > release_notes.txt
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          prerelease: false
+          # Use GH feature to populate the changelog automatically
+          body_path: release_notes.txt
+          fail_on_unmatched_files: true
+          files: rule_oci_bundle-*.tar.gz
