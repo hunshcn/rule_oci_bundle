@@ -11,6 +11,8 @@ Similar to crane pull --format=oci image1 image2 output-dir, but locally.
 ## Usage
 
 ```starlark
+load("@rule_oci_bundle//:defs.bzl", "oci_bundle")
+
 oci_bundle(
     name = "bundle",
     images = {
