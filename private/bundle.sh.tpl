@@ -25,7 +25,7 @@ function create_oci_layout() {
     mkdirp "${path}"
 
     echo '{"imageLayoutVersion": "1.0.0"}' > "${path}/oci-layout" 
-    echo '{"schemaVersion": 2, "manifests": []}' > "${path}/index.json"
+    echo '{"schemaVersion": 2, "mediaType": "application/vnd.oci.image.index.v1+json", "manifests": []}' > "${path}/index.json"
 }
 
 function append_manifest() {
